@@ -1,0 +1,59 @@
+side_bar_html = ""
+gmarkers = []
+highlighted_marker = null
+map = null
+
+@initSearchMap = () ->
+  myOptions =
+    zoom: 8,
+    center: new google.maps.LatLng(43.907787,-79.359741),
+    mapTypeControl: true,
+    mapTypeControlOptions: {style: google.maps.MapTypeControlStyle.DROPDOWN_MENU},
+    navigationControl: true,
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+
+  map = new google.maps.Map(document.getElementById("map_canvas"), myOptions)
+
+  point = new google.maps.LatLng(43.65654,-79.90138)
+  marker = createMarker(point,"This place")
+
+  point = new google.maps.LatLng(43.91892,-78.89231)
+  marker = createMarker(point,"That place")
+
+  point = new google.maps.LatLng(33.0000, 44.0000)
+  marker = createMarker(point,"The other place")
+
+  point = new google.maps.LatLng(51.383773, -0.068204)
+  marker = createMarker(point,"The other place")
+
+  document.getElementById("side_bar").innerHTML = side_bar_html
+
+
+@myClick = (i) ->
+  google.maps.event.trigger(gmarkers[i], 'click')
+
+
+createMarker = (latlng, name) ->
+  marker = new google.maps.Marker(
+    position: latlng,
+    map: map,
+    icon: '<%= image_path('inactive_pin.png') %>',
+    anchor: new google.maps.Point(latlng.lat(), latlng.lng()),
+    zIndex: Math.round(latlng.lat()*-100000)<<5
+    )
+
+  google.maps.event.addListener(marker, 'click', () ->
+    unhighlightMarker(highlighted_marker)
+    marker.setIcon('<%= image_path('active_pin.png') %>')
+    highlighted_marker = marker
+    map.setCenter(marker.getPosition())
+  )
+
+  gmarkers.push(marker)
+  side_bar_html += '<a href="javascript:myClick(' + (gmarkers.length-1) + ')">' + name + '<\/a><br>'
+
+
+
+unhighlightMarker = (marker) ->
+  if marker?
+    marker.setIcon('<%= image_path('inactive_pin.png') %>')
